@@ -1,4 +1,11 @@
-<img src="./demo.gif">
+# Haxe Demo – Click-&-Particle Prototype
+![gif](demo.gif)
+One-evening prototype:
+
+- Sprite rendering
+- Keyboard movement
+- Click-triggered particle burst with gravity & fade
+
 
 ## to setup
 ```
