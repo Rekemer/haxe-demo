@@ -5,7 +5,8 @@ One-evening prototype:
 - Sprite rendering
 - Keyboard movement
 - Click-triggered particle burst with gravity & fade
-
+## Live demo
+https://rekemer.github.io/haxe-demo/
 
 ## to setup
 ```
