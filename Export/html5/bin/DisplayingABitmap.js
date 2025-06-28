@@ -891,7 +891,7 @@ ApplicationMain.main = function() {
 };
 ApplicationMain.create = function(config) {
 	var app = new openfl_display_Application();
-	app.meta.h["build"] = "3";
+	app.meta.h["build"] = "1";
 	app.meta.h["company"] = "OpenFL";
 	app.meta.h["file"] = "DisplayingABitmap";
 	app.meta.h["name"] = "Displaying a Bitmap";
@@ -3367,7 +3367,7 @@ openfl_display_Sprite.prototype = $extend(openfl_display_DisplayObjectContainer.
 	,__properties__: $extend(openfl_display_DisplayObjectContainer.prototype.__properties__,{get_graphics:"get_graphics",set_buttonMode:"set_buttonMode",get_buttonMode:"get_buttonMode"})
 });
 var Main = function() {
-	var _gthis = this;
+	this.particles = [];
 	openfl_display_Sprite.call(this);
 	this.box = new openfl_display_Sprite();
 	this.box.get_graphics().beginFill(3368652);
@@ -3376,17 +3376,9 @@ var Main = function() {
 	this.box.set_x(350);
 	this.box.set_y(250);
 	this.addChild(this.box);
-	this.label = new openfl_text_TextField();
-	this.label.set_text("Click me!");
-	this.label.set_y(10);
-	this.addChild(this.label);
-	this.box.addEventListener("click",function(_) {
-		_gthis.box.get_graphics().clear();
-		_gthis.box.get_graphics().beginFill(null,Math.random() * 16777215);
-		_gthis.box.get_graphics().drawRect(0,0,100,100);
-		_gthis.box.get_graphics().endFill();
-	});
+	this.box.addEventListener("click",$bind(this,this.onBoxClick));
 	openfl_Lib.get_current().stage.addEventListener("keyDown",$bind(this,this.onKey));
+	this.addEventListener("enterFrame",$bind(this,this.onEnterFrame));
 };
 $hxClasses["Main"] = Main;
 Main.__name__ = "Main";
@@ -3405,6 +3397,28 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		} else if(e.keyCode == 40) {
 			var fh = this.box;
 			fh.set_y(fh.get_y() + 10);
+		}
+	}
+	,onBoxClick: function(_) {
+		var _g = 0;
+		while(_g < 25) {
+			var i = _g++;
+			var angle = Math.random() * Math.PI * 2;
+			var speed = 150 + Math.random() * 150;
+			var p = new Particle(this.box.get_x() + 50,this.box.get_y() + 50,Math.cos(angle) * speed,Math.sin(angle) * speed,1.0,Math.random() * 16777215 | 0);
+			this.particles.push(p);
+			this.addChild(p);
+		}
+	}
+	,onEnterFrame: function(_) {
+		var dt = 1.0 / openfl_Lib.get_current().stage.get_frameRate();
+		var i = this.particles.length - 1;
+		while(i >= 0) {
+			if(!this.particles[i].update(dt)) {
+				this.removeChild(this.particles[i]);
+				this.particles.splice(i,1);
+			}
+			--i;
 		}
 	}
 	,__class__: Main
@@ -3592,6 +3606,34 @@ Lambda.count = function(it,pred) {
 	}
 	return n;
 };
+var Particle = function(x,y,vx,vy,life,color) {
+	openfl_display_Sprite.call(this);
+	this.set_x(x);
+	this.set_y(y);
+	this.vx = vx;
+	this.vy = vy;
+	this.life = life;
+	this.get_graphics().beginFill(color);
+	this.get_graphics().drawCircle(0,0,3);
+	this.get_graphics().endFill();
+};
+$hxClasses["Particle"] = Particle;
+Particle.__name__ = "Particle";
+Particle.__super__ = openfl_display_Sprite;
+Particle.prototype = $extend(openfl_display_Sprite.prototype,{
+	update: function(dt) {
+		this.life -= dt;
+		if(this.life <= 0) {
+			return false;
+		}
+		this.vy += 300 * dt;
+		this.set_x(this.get_x() + this.vx * dt);
+		this.set_y(this.get_y() + this.vy * dt);
+		this.set_alpha(this.life);
+		return true;
+	}
+	,__class__: Particle
+});
 Math.__name__ = "Math";
 var Reflect = function() { };
 $hxClasses["Reflect"] = Reflect;
@@ -24658,7 +24700,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 604941;
+	this.version = 757400;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";
@@ -77787,6 +77829,7 @@ openfl_display_DisplayObject.__tempStack = new lime_utils_ObjectPool(function() 
 },function(stack) {
 	stack.set_length(0);
 });
+Particle.GRAVITY = 300;
 Xml.Element = 0;
 Xml.PCData = 1;
 Xml.CData = 2;
